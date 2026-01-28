@@ -525,13 +525,15 @@ class Codet5Encoder(nn.Module):
 
     def forward(self, pcode):
         
-        model_inputs = self.tokenizer(pcode, max_length=1024, padding="max_length", truncation=True, return_tensors = "pt").to('cuda')
-        #model_inputs = self.tokenizer(pcode, max_length=1024, padding="max_length", truncation=True, return_tensors = "pt").to('cpu')
-
-        # device = torch.device('cuda')
-        # input_ids = torch.tensor(model_inputs['input_ids']).to(device) 
-        # attention_mask = torch.tensor(model_inputs['attention_mask']).to(device)  
-        embs = self.t5model(**model_inputs)  
+        model_inputs = self.tokenizer(pcode, max_length=1024, padding="max_length", truncation=True, return_tensors = "pt")
+        # Move tokenized tensors to the device of the encoder (avoid hardcoded 'cuda')
+        try:
+            encoder_device = next(self.t5model.encoder.parameters()).device
+        except StopIteration:
+            encoder_device = torch.device('cpu')
+        model_inputs = {k: v.to(encoder_device) for k, v in model_inputs.items()}
+ 
+        embs = self.t5model(**model_inputs)
         
         return embs
 
