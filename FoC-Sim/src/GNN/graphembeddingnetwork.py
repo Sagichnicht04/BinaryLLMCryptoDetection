@@ -525,7 +525,8 @@ class Codet5Encoder(nn.Module):
 
     def forward(self, pcode):
         
-        model_inputs = self.tokenizer(pcode, max_length=1024, padding="max_length", truncation=True, return_tensors = "pt").to('cuda')
+        #model_inputs = self.tokenizer(pcode, max_length=1024, padding="max_length", truncation=True, return_tensors = "pt").to('cuda')
+        model_inputs = self.tokenizer(pcode, max_length=1024, padding="max_length", truncation=True, return_tensors = "pt").to('cpu')
 
         # device = torch.device('cuda')
         # input_ids = torch.tensor(model_inputs['input_ids']).to(device) 

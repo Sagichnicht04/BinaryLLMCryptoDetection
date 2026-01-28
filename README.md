@@ -7,6 +7,19 @@
 
 ## Environment Setup
 
+Due to outdated packages, conda must be used.
+
+```
+curl -O https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
+conda config --set auto_activate_base false
+conda create -n legacy38 python=3.8
+conda activate legacy38
+conda install -c conda-forge mkl-service=2.4.0
+conda install -c dglteam dgl=0.6.1
+conda install -c conda-forge scipy=1.8.0
+```
+
 `pip install -r requirements.txt`
 
 ## Evaluation
