@@ -524,17 +524,11 @@ class Codet5Encoder(nn.Module):
         self.t5model = CodeT5PForEmbeddingModel(self.t5model.get_encoder(), self.tokenizer)
 
     def forward(self, pcode):
-        
-        model_inputs = self.tokenizer(pcode, max_length=1024, padding="max_length", truncation=True, return_tensors = "pt")
-        # Move tokenized tensors to the device of the encoder (avoid hardcoded 'cuda')
-        try:
-            encoder_device = next(self.t5model.encoder.parameters()).device
-        except StopIteration:
-            encoder_device = torch.device('cpu')
-        model_inputs = {k: v.to(encoder_device) for k, v in model_inputs.items()}
- 
+        # Tokenize on CPU then move tensors to the same device as this module's parameters
+        model_inputs = self.tokenizer(pcode, max_length=1024, padding="max_length", truncation=True, return_tensors="pt")
+        device = next(self.parameters()).device
+        model_inputs = {k: v.to(device) for k, v in model_inputs.items()}
         embs = self.t5model(**model_inputs)
-        
         return embs
 
 class GraphEmbeddingNet(nn.Module):

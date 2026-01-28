@@ -400,17 +400,17 @@ def collate_fn_forGenEmb(batch):
     fea_embed = torch.tensor(np.array(fea_embed))
     
     return {
-            'node_features':node_features,          # <-- do NOT move to device here
+            'node_features':node_features,
             'edge_features':edge_features,
             'from_idx':from_idx,
             'to_idx':to_idx,
             'graph_idx':graph_idx,
-            'n_graphs':len(graphs),
-            'labels':labels,
-            'fids':fids,
-            'pcode':pcode,
-            'fea_embed':fea_embed
-        }
+             'n_graphs':len(graphs),
+             'labels':labels,
+             'fids':fids,
+             'pcode':pcode,
+             'fea_embed':fea_embed
+         }
 
 def train(model_path:str = None):
     wandb.init(project="Train_GNN", name=model_save_path, resume=resume_from_checkpoint, mode=wandb_mode)
@@ -469,13 +469,10 @@ def generate_embedding(model_state_path, group_path, feature_path):
     model = build_model(config, GraphModelForACFG, 
                         node_feature_dim=200, edge_feature_dim=1)
     model.load_state_dict(model_state)
-    # Move model to cuda:0 and then wrap with DataParallel when multiple GPUs present
-    if torch.cuda.is_available():
-        model = model.to(torch.device('cuda:0'))
-        if torch.cuda.device_count() > 1:
-            model = torch.nn.DataParallel(model, device_ids=list(range(torch.cuda.device_count())))
-    else:
-        model = model.to(device)
+    # Move model to primary device and then wrap with DataParallel if multiple GPUs available
+    model = model.to(device)
+    if torch.cuda.is_available() and torch.cuda.device_count() > 1:
+        model = torch.nn.DataParallel(model, device_ids=list(range(torch.cuda.device_count())))
     model.eval()
 
     func_embs = dict()
