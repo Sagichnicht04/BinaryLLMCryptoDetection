@@ -38,8 +38,8 @@ random.seed(233)
 model_name = "gnn-model"
 model_save_path = f"../models/chkp_{model_name}"
 resume_from_checkpoint = False
-#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device = torch.device('cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cpu')
 train_group_path, train_feature_path = "../cryptobench/GCN/train.csv","../cryptobench/GCN/train_all_feature.json"
 test_group_path, test_feature_path = "../cryptobench/GCN/test.csv","../cryptobench/GCN/test_all_feature.json"
 train_batch_size = 48
