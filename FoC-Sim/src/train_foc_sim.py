@@ -35,11 +35,17 @@ tokenization_utils.logger.setLevel('ERROR')
 random.seed(233)
 
 # <parameters start>
+# Make GPUs 0 and 1 visible
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0,1")
+
+# Use cuda:0 if available
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
 model_name = "gnn-model"
 model_save_path = f"../models/chkp_{model_name}"
 resume_from_checkpoint = False
 #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device = torch.device('cpu')
+#device = torch.device('cpu')
 train_group_path, train_feature_path = "../cryptobench/GCN/train.csv","../cryptobench/GCN/train_all_feature.json"
 test_group_path, test_feature_path = "../cryptobench/GCN/test.csv","../cryptobench/GCN/test_all_feature.json"
 train_batch_size = 48
@@ -412,7 +418,7 @@ def train(model_path:str = None):
     logging.info(f"[-] training model {model_path}")
     config = get_default_config()
     model = build_model(config,GraphModelForACFG,node_feature_dim=200,edge_feature_dim=1)
-    model = model.to(device)
+    # model = model.to(device)
     optimizer = Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     # read data
@@ -463,6 +469,9 @@ def generate_embedding(model_state_path, group_path, feature_path):
     model = build_model(config, GraphModelForACFG, 
                         node_feature_dim=200, edge_feature_dim=1)
     model.load_state_dict(model_state)
+    # For generation, wrap with DataParallel if multiple GPUs available so we use GPU 0 and 1
+    if torch.cuda.is_available() and torch.cuda.device_count() > 1:
+        model = torch.nn.DataParallel(model, device_ids=list(range(torch.cuda.device_count())))
     model = model.to(device)
     model.eval()
 
